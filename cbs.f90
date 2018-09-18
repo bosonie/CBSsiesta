@@ -1,3 +1,5 @@
+!main of the program
+
 program cbs
 
 use hsx_m, only: read_hsx_file,hsx_t,read_OrbIndx_file,createHS
