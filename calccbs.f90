@@ -313,7 +313,7 @@ implicit none
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
 double precision,intent(in) :: emax,p1,p2
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: BB(:,:),AA(:,:),work(:)
@@ -321,7 +321,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1),llproj
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=12) :: filename
+character(len=12) :: filename,filename2
 !complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
 
 
@@ -355,8 +355,10 @@ do i=1,nspin
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
         write(i+100,*) "#Orbitals has the same label of ORB_INDEX file"
   else
-        write(filename,'("Kspin",I1,"layer1")')i
+        write(filename,'("KSpin",I1,"layer1")')i
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
+        write(filename2,'("KMinSpin",I1,"layer1")')i
+        open(unit=i+300,file=filename2,Access = 'append',status="unknown")
   endif
   E=emax/RyToEv
   alpha(:)=1.d0
@@ -396,11 +398,19 @@ do i=1,nspin
         enddo
     enddo
   else
+   posmin=300
+   reposmin=0.d0
     do m=1,2*dime
        write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+       if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
+          posmin=-real(real(log(alpha(m)/beta(m))))
+          reposmin=real(aimag(log(alpha(m)/beta(m))))
+       endif
     enddo
-    close(i+100)
+   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+   close(i+300)
   endif
+  close(i+100)
 enddo 
 
 deallocate(AA,BB,alpha,beta)
@@ -418,7 +428,7 @@ implicit none
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
 double precision,intent(in) :: emax,p1,p2
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: SSBISTRAS(:,:), HSBISTRAS(:,:,:)
@@ -427,7 +437,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1),llproj
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=12) :: filename
+character(len=12) :: filename, filename2
 double complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:)!, SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -464,8 +474,10 @@ do i=1,nspin
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
         write(i+100,*) "#Orbitals has the same label of ORB_INDEX file"
   else
-        write(filename,'("Kspin",I1,"layer2")')i
+        write(filename,'("KSpin",I1,"layer2")')i
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
+        write(filename2,'("KMinSpin",I1,"layer2")')i
+        open(unit=i+300,file=filename2,Access = 'append',status="unknown")
   endif
   E=emax/RyToEv
   alpha(:)=1.d0
@@ -508,9 +520,17 @@ do i=1,nspin
         enddo
     enddo
   else
+   posmin=300
+   reposmin=0.d0
     do m=1,4*dime
        write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))),  real(aimag(log(alpha(m)/beta(m)))) 
+       if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
+          posmin=-real(real(log(alpha(m)/beta(m))))
+          reposmin=real(aimag(log(alpha(m)/beta(m))))
+       endif
     enddo
+   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+   close(i+300)
   endif
   close(i+100)
 enddo 
@@ -529,7 +549,7 @@ implicit none
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
 double precision,intent(in) :: emax,p1,p2
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: SSBISTRAS(:,:), HSBISTRAS(:,:,:)
@@ -581,8 +601,10 @@ do i=1,nspin
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
         write(i+100,*) "#Orbitals has the same label of ORB_INDEX file"
   else
-        write(filename,'("Kspin",I1,"layer3")')i
+        write(filename,'("KSpin",I1,"layer3")')i
         open(unit=i+100,file=filename,Access = 'append',status="unknown")
+        write(filename2,'("KMinSpin",I1,"layer3")')i
+        open(unit=i+300,file=filename2,Access = 'append',status="unknown")
   endif
   E=emax/RyToEv
   alpha(:)=1.d0
@@ -627,9 +649,17 @@ do i=1,nspin
         enddo
     enddo
   else
+   posmin=300
+   reposmin=0.d0
    do m=1,6*dime
        write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+       if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
+          posmin=-real(real(log(alpha(m)/beta(m))))
+          reposmin=real(aimag(log(alpha(m)/beta(m))))
+       endif
    enddo
+   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+   close(i+300)
   endif
   close(i+100)
 enddo 
