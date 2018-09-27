@@ -109,7 +109,11 @@ k(:)=0.d0
 !1) fix k as well and find eigenvectors for symmetries
 !2) vary k
 if (Ksetting.or.SymSetting) then
- 
+
+  if (Ksetting.and.SymSetting) then
+     STOP "Error: VaringKsetting OR SymSetting is allowed, can't do both at same time"
+  endif 
+
   if (SymSetting) then
         k(:)=p(1)*b1(:)+p(2)*b2(:)
         write(*,*) "analysing projections at"
