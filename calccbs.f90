@@ -22,7 +22,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1)
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=11) :: filename
+character(len=11) :: filename, filename2
 !complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -50,8 +50,10 @@ allocate(VR(dime*2,dime*2))
 
 do i=1,nspin
   write(filename,'("spin",I1,"layer1")')i
+  write(filename2,'("spin",I1,"layer1purereal")')i
   open(unit=i+100,file=filename,status="unknown")
- 
+  open(unit=i+200,file=filename2,status="unknown") 
+
   !change energy in Ry
   dummyemax=emax/RyToEv
   dummyemin=emin/RyToEv
@@ -82,6 +84,9 @@ do i=1,nspin
     end if
     do m=1,2*dime
          write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+         if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
+            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
+         endif
     enddo
   enddo
   close(i+100)
@@ -111,7 +116,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1)
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=11) :: filename
+character(len=11) :: filename,filename2
 double complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:)!, SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -144,7 +149,9 @@ allocate(VR(dime*4,dime*4))
 
 do i=1,nspin
   write(filename,'("spin",I1,"layer2")')i
+  write(filename2,'("spin",I1,"layer2purereal")')i
   open(unit=i+100,file=filename,status="unknown")
+  open(unit=i+200,file=filename2,status="unknown")
  
   !change energy in Ry
   dummyemax=emax/RyToEv
@@ -178,6 +185,9 @@ do i=1,nspin
     end if
     do m=1,4*dime
          write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+         if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
+            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
+         endif
     enddo
   enddo
   close(i+100)
@@ -285,12 +295,6 @@ do i=1,nspin
          write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
          if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
             write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
-!            write(*,*) -real(real(log(alpha(m)/beta(m)))), -real(aimag(log(alpha(m)/beta(m))))
-!            do l=1,6*dime
-      !      write(*,*) VR(l,m)+VR(l+16,m)+VR(l+32,m)+VR(l+48,m)+VR(l+64,m)+VR(l+80,m)           
-!               write(*,*) abs(real(real(VR(l,m))))+abs(real(aimag(VR(l,m)))), VR(l,m)
-!            enddo
-!            write(*,*)
          endif
     enddo
   enddo
