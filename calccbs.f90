@@ -407,7 +407,12 @@ do i=1,nspin
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
     enddo
-   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+    if (p2.eq.0.5) then
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,*)
+    else
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+    endif
    close(i+300)
   endif
   close(i+100)
@@ -529,7 +534,12 @@ do i=1,nspin
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
     enddo
-   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+    if (p2.eq.0.5) then
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,*)
+    else
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+    endif
    close(i+300)
   endif
   close(i+100)
@@ -658,7 +668,12 @@ do i=1,nspin
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
    enddo
-   write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+   if (p2.eq.0.5) then
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,*)
+   else
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+   endif
    close(i+300)
   endif
   close(i+100)
