@@ -22,7 +22,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1)
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=11) :: filename, filename2
+character(len=21) :: filename, filename2
 !complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -116,7 +116,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1)
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=11) :: filename,filename2
+character(len=21) :: filename,filename2
 double complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:)!, SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -191,6 +191,7 @@ do i=1,nspin
     enddo
   enddo
   close(i+100)
+  close(i+200)
 enddo 
 
 deallocate(AA,BB,alpha,beta)
