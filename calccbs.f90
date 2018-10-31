@@ -7,13 +7,13 @@ double precision, parameter, private :: RyToEv = 13.605698066
 contains
 
 
-subroutine FirstLayerInteraction(emin,emax,nbin,HD,SD,HS,SS)
+subroutine FirstLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,dist)
 
 implicit none
 
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
-double precision,intent(in) :: emin, emax
+double precision,intent(in) :: emin, emax, dist
 double precision :: dummyemax,dummyemin,E,step
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -83,9 +83,9 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,2*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
          if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
+            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
          endif
     enddo
   enddo
@@ -100,13 +100,13 @@ end subroutine FirstLayerInteraction
 
 
 
-subroutine SecondLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,HSBIS,SSBIS)
+subroutine SecondLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,HSBIS,SSBIS,dist)
 
 implicit none
 
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
-double precision,intent(in) :: emin, emax
+double precision,intent(in) :: emin, emax, dist
 double precision :: dummyemax,dummyemin,E,step
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -184,9 +184,9 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,4*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
          if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
+            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
          endif
     enddo
   enddo
@@ -201,13 +201,13 @@ deallocate(HSTRAS,SSTRAS,HSBISTRAS,SSBISTRAS)
 end subroutine SecondLayerInteraction
 
 
-subroutine ThirdLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+subroutine ThirdLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,dist)
 
 implicit none
 
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
-double precision,intent(in) :: emin, emax
+double precision,intent(in) :: emin, emax, dist
 double precision :: dummyemax,dummyemin,E,step
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -293,9 +293,9 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,6*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
          if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m)))), -real(real(log(alpha(m)/beta(m))))
+            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
          endif
     enddo
   enddo
@@ -311,13 +311,13 @@ end subroutine ThirdLayerInteraction
 
 
 
-subroutine KFirstLayerInteraction(emax,HD,SD,HS,SS,p1,p2,SymSetting)
+subroutine KFirstLayerInteraction(emax,HD,SD,HS,SS,p1,p2,SymSetting,dist)
 
 implicit none
 
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
-double precision,intent(in) :: emax,p1,p2
+double precision,intent(in) :: emax,p1,p2,dist
 double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -326,7 +326,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1),llproj
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=12) :: filename,filename2
+character(len=21) :: filename,filename2
 !complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
 
 
@@ -390,7 +390,7 @@ do i=1,nspin
   end if
   if (SymSetting) then
     do m=1,2*dime
-        write(i+100,*) "eigenvalue",-real(real(log(alpha(m)/beta(m)))),real(aimag(log(alpha(m)/beta(m))))
+        write(i+100,*) "eigenvalue",-real(real(log(alpha(m)/beta(m))))/dist,real(aimag(log(alpha(m)/beta(m))))/dist
         !do l=1,6*dime
         !   write(*,*)  abs(real(real(VR(l,m))))+abs(real(aimag(VR(l,m)))),VR(l,m)
         !enddo
@@ -406,17 +406,17 @@ do i=1,nspin
    posmin=300
    reposmin=0.d0
     do m=1,2*dime
-       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
        if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
           posmin=-real(real(log(alpha(m)/beta(m))))
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
     enddo
     if (p2.eq.0.5) then
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
      write(i+300,*)
     else
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
     endif
    close(i+300)
   endif
@@ -431,13 +431,13 @@ end subroutine KFirstLayerInteraction
 
 
 
-subroutine KSecondLayerInteraction(emax,HD,SD,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting)
+subroutine KSecondLayerInteraction(emax,HD,SD,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
 
 implicit none
 
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
-double precision,intent(in) :: emax,p1,p2
+double precision,intent(in) :: emax,p1,p2,dist
 double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -447,7 +447,7 @@ double complex,allocatable :: alpha(:),beta(:)
 double complex :: VL(1,1),llproj
 double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
 double precision,allocatable :: rwork(:)
-character(len=12) :: filename, filename2
+character(len=21) :: filename, filename2
 double complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:)!, SSTRIS(:,:),HSTRIS(:,:,:)
 
 dime=size(SD,dim=1)
@@ -516,7 +516,7 @@ do i=1,nspin
   end if
   if (SymSetting) then
     do m=1,4*dime
-        write(i+100,*) "eigenvalue", -real(real(log(alpha(m)/beta(m)))),real(aimag(log(alpha(m)/beta(m))))
+        write(i+100,*) "eigenvalue", -real(real(log(alpha(m)/beta(m))))/dist,real(aimag(log(alpha(m)/beta(m))))/dist
         !do l=1,6*dime
         !   write(*,*) abs(real(real(VR(l,m))))+abs(real(aimag(VR(l,m)))),VR(l,m)
         !enddo
@@ -533,17 +533,17 @@ do i=1,nspin
    posmin=300
    reposmin=0.d0
     do m=1,4*dime
-       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))),  real(aimag(log(alpha(m)/beta(m)))) 
+       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m))))/dist,  real(aimag(log(alpha(m)/beta(m))))/dist
        if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
           posmin=-real(real(log(alpha(m)/beta(m))))
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
     enddo
     if (p2.eq.0.5) then
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
      write(i+300,*)
     else
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
     endif
    close(i+300)
   endif
@@ -557,13 +557,13 @@ deallocate(HSTRAS,SSTRAS,HSBISTRAS,SSBISTRAS)
 end subroutine KSecondLayerInteraction
 
 
-subroutine KThirdLayerInteraction(emax,HD,SD,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting)
+subroutine KThirdLayerInteraction(emax,HD,SD,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
 
 implicit none
 
 logical,intent(in) :: SymSetting
 integer :: l,i,m,j,dime,nspin,lwork,info,ll
-double precision,intent(in) :: emax,p1,p2
+double precision,intent(in) :: emax,p1,p2,dist
 double precision :: dummyemax,dummyemin,E,step,posmin,reposmin
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
@@ -650,7 +650,7 @@ do i=1,nspin
   end if
   if (SymSetting) then
     do m=1,6*dime
-        write(i+100,*) "eigenvalue", -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+        write(i+100,*) "eigenvalue", -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
         !do l=1,6*dime
         !   write(*,*) abs(real(real(VR(l,m))))+abs(real(aimag(VR(l,m)))),VR(l,m)
         !enddo
@@ -667,17 +667,17 @@ do i=1,nspin
    posmin=300
    reposmin=0.d0
    do m=1,6*dime
-       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m)))), real(aimag(log(alpha(m)/beta(m))))
+       write(i+100,*) p1,p2, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
        if (-real(real(log(alpha(m)/beta(m)))).gt.0.d0.and.-real(real(log(alpha(m)/beta(m)))).lt.posmin) then
           posmin=-real(real(log(alpha(m)/beta(m))))
           reposmin=real(aimag(log(alpha(m)/beta(m))))
        endif
    enddo
    if (p2.eq.0.5) then
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
      write(i+300,*)
    else
-     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin, reposmin
+     write(i+300,'(2f16.8,2f16.8)') p1,p2, posmin/dist, reposmin/dist
    endif
    close(i+300)
   endif
