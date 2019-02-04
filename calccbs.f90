@@ -14,7 +14,7 @@ implicit none
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
 double precision,intent(in) :: emin, emax, dist
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,thek
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: BB(:,:),AA(:,:),work(:)
@@ -83,10 +83,13 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,2*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
-         if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
-         endif
+        thek=-real(real(log(alpha(m)/beta(m))))/dist
+        if (thek.gt.100000000000000) cycle
+        if (thek.ne.thek) cycle
+        write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
+        if (thek.le.0.001.and.thek.ge.-0.001) then
+           write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, thek
+        endif
     enddo
   enddo
   close(i+100)
@@ -107,7 +110,7 @@ implicit none
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
 double precision,intent(in) :: emin, emax, dist
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,thek
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: SSBISTRAS(:,:), HSBISTRAS(:,:,:)
@@ -184,10 +187,13 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,4*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
-         if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
-         endif
+        thek=-real(real(log(alpha(m)/beta(m))))/dist
+        if (thek.gt.100000000000000) cycle
+        if (thek.ne.thek) cycle
+        write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
+        if (thek.le.0.001.and.thek.ge.-0.001) then
+           write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, thek
+        endif
     enddo
   enddo
   close(i+100)
@@ -208,7 +214,7 @@ implicit none
 integer :: l,i,m,j,dime,nspin,lwork,info
 integer,intent(in) :: nbin
 double precision,intent(in) :: emin, emax, dist
-double precision :: dummyemax,dummyemin,E,step
+double precision :: dummyemax,dummyemin,E,step,thek
 double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: SSBISTRAS(:,:), HSBISTRAS(:,:,:)
@@ -293,10 +299,13 @@ do i=1,nspin
          write(*,*) info
     end if
     do m=1,6*dime
-         write(i+100,*) E*RyToEv, -real(real(log(alpha(m)/beta(m))))/dist, real(aimag(log(alpha(m)/beta(m))))/dist
-         if (-real(real(log(alpha(m)/beta(m)))).le.0.001.and.-real(real(log(alpha(m)/beta(m)))).ge.-0.001) then
-            write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, -real(real(log(alpha(m)/beta(m))))/dist
-         endif
+        thek=-real(real(log(alpha(m)/beta(m))))/dist
+        if (thek.gt.100000000000000) cycle
+        if (thek.ne.thek) cycle
+        write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
+        if (thek.le.0.001.and.thek.ge.-0.001) then
+           write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, thek
+        endif
     enddo
   enddo
   close(i+100)

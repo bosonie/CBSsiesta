@@ -123,8 +123,8 @@ k(:)=0.d0
 
 
 !Fist case, I have fixed E (Emax of input) and 
-!1) fix k as well and find eigenvectors for symmetries
-!2) vary k
+!1) fix k as well and find eigenvectors for symmetries: SymSetting
+!2) vary k: Ksetting
 if (Ksetting.or.SymSetting) then
 
   if (Ksetting.and.SymSetting) then
