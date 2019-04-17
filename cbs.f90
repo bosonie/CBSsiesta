@@ -15,6 +15,7 @@ double precision :: EMIN, EMAX,p1,p2,dist
 type(hsx_t)  :: hw
 double complex,allocatable :: S(:,:),H(:,:,:), SS(:,:), HS(:,:,:)
 double complex,allocatable :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
+double complex,allocatable :: SS4(:,:), HS4(:,:,:)
 character(len=10) :: pre
 integer :: bins,j,l,maxsuperc(3),dir,norb,nspin,ooo
 integer,allocatable :: isc(:,:)
@@ -113,9 +114,9 @@ enddo
 !Last summary on the calculation properties
 write(*,*) "N cell replicas in choosen direc",maxsuperc(dir), "norb",hw%no_u, "nspin", hw%nspin
 
-if (maxsuperc(dir).gt.3) then
-   write(*,*) "warning, number of replica in the choosen direction is > 3"
-   write(*,*) "for the calculation we will use the 3 layers structure"
+if (maxsuperc(dir).gt.4) then
+   write(*,*) "warning, number of replica in the choosen direction is > 4"
+   write(*,*) "for the calculation we will use the 4 layers structure"
 endif
 
 k(:)=0.d0
@@ -140,8 +141,9 @@ if (Ksetting.or.SymSetting) then
         allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
         allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
         allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
+        allocate(SS4(hw%no_u,hw%no_u), HS4(hw%no_u,hw%no_u,hw%nspin))
 
-        call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+        call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4)
 
         if (maxsuperc(dir).eq.1) then
                 call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
@@ -151,7 +153,7 @@ if (Ksetting.or.SymSetting) then
                 call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
         endif
 
-        deallocate(S,H,SS,HS)
+        deallocate(S,H,SS,HS,HS4,SS4)
         deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
 
    else
@@ -172,8 +174,9 @@ if (Ksetting.or.SymSetting) then
           allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
           allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
           allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-       
-          call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+          allocate(SS4(hw%no_u,hw%no_u), HS4(hw%no_u,hw%no_u,hw%nspin))
+
+          call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4)
        
           if (maxsuperc(dir).eq.1) then
              call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
@@ -183,7 +186,7 @@ if (Ksetting.or.SymSetting) then
              call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
           endif
        
-          deallocate(S,H,SS,HS)
+          deallocate(S,H,SS,HS,HS4,SS4)
           deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
          enddo
         enddo
@@ -208,18 +211,22 @@ else
    allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin), SS(hw%no_u,hw%no_u), HS(hw%no_u,hw%no_u,hw%nspin))
    allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
    allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
+   allocate(SS4(hw%no_u,hw%no_u), HS4(hw%no_u,hw%no_u,hw%nspin))
    
-   call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+   call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4)
   
    if (maxsuperc(dir).eq.1) then
       call FirstLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,dist)
    elseif (maxsuperc(dir).eq.2) then
       call SecondLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,dist)
    else
+!   elseif (maxsuperc(dir).eq.3) then
       call ThirdLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,dist)
+!   else
+!      call FourthLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4,dist)
    endif
    
-   deallocate(S,H,SS,HS)
+   deallocate(S,H,SS,HS,HS4,SS4)
    deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
 
 endif

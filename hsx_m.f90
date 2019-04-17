@@ -128,13 +128,14 @@ end subroutine read_OrbIndx_file
 
 !--------------------------------------
 
-subroutine createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+subroutine createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4)
 type(hsx_t), intent(in)  :: hw
 integer, dimension(:,:), intent(in) :: isc
 integer, intent(in) :: dir
 double precision, intent(in) :: k(:)
 double complex, intent(out) :: S(:,:), SS(:,:),SSBIS(:,:),SSTRIS(:,:)
 double complex, intent(out) :: H(:,:,:), HS(:,:,:), HSBIS(:,:,:), HSTRIS(:,:,:)
+double complex, intent(out) :: SS4(:,:), HS4(:,:,:)
 
    complex :: i, phase
    integer :: io, j, ij, jos, jo
@@ -171,6 +172,10 @@ double complex, intent(out) :: H(:,:,:), HS(:,:,:), HSBIS(:,:,:), HSTRIS(:,:,:)
        !    phase = 1!exp(i*(k(1)*hw%xij(1,jo)+k(2)*hw%xij(2,jo)))         !sum(k(:)*hw%xij(:,jo)))
            HSTRIS(io,jo,1:hw%nspin) = HSTRIS(io,jo,1:hw%nspin)+phase*hw%hamilt(ij,1:hw%nspin)
            SSTRIS(io,jo) = SSTRIS(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
+        elseif (isc(jos,dir).eq.-4) then
+       !    phase = 1!exp(i*(k(1)*hw%xij(1,jo)+k(2)*hw%xij(2,jo)))       !    !sum(k(:)*hw%xij(:,jo)))
+           HS4(io,jo,1:hw%nspin) =HS4(io,jo,1:hw%nspin)+phase*hw%hamilt(ij,1:hw%nspin)
+           SS4(io,jo) = SS4(io,jo) + phase*hw%Sover(ij) ! overlap matrixelement
         endif
      enddo
    enddo

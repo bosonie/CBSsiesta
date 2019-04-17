@@ -319,6 +319,126 @@ deallocate(HSTRAS,SSTRAS,HSBISTRAS,SSBISTRAS,HSTRISTRAS,SSTRISTRAS)
 end subroutine ThirdLayerInteraction
 
 
+subroutine FourthLayerInteraction(emin,emax,nbin,HD,SD,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4,dist)
+
+implicit none
+
+integer :: l,i,m,j,dime,nspin,lwork,info
+integer,intent(in) :: nbin
+double precision,intent(in) :: emin, emax, dist
+double precision :: dummyemax,dummyemin,E,step,thek
+double complex,intent(in) :: SD(:,:),HD(:,:,:), SS(:,:), HS(:,:,:)
+double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
+double complex,allocatable :: SSBISTRAS(:,:), HSBISTRAS(:,:,:)
+double complex,allocatable :: SSTRISTRAS(:,:), HSTRISTRAS(:,:,:)
+double complex,allocatable :: BB(:,:),AA(:,:),work(:)
+double complex,allocatable :: alpha(:),beta(:)
+double complex :: VL(1,1)
+double complex,allocatable :: VR(:,:)!,ppp(2,2),qqq(2,2),zzz(2),xxx(2)
+double precision,allocatable :: rwork(:)
+character(len=21) :: filename, filename2
+double complex,intent(in) :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:), HSTRIS(:,:,:)
+double complex,intent(in) :: SS4(:,:), HS4(:,:,:)
+double complex,allocatable :: SS4TRAS(:,:), HS4TRAS(:,:,:)
+
+dime=size(SD,dim=1)
+nspin=size(HD,dim=3)
+
+!Create conjugate transpose
+allocate(SSTRAS(dime,dime),HSTRAS(dime,dime,nspin))
+allocate(SSBISTRAS(dime,dime),HSBISTRAS(dime,dime,nspin))
+allocate(SSTRISTRAS(dime,dime),HSTRISTRAS(dime,dime,nspin))
+allocate(SS4TRAS(dime,dime),HS4TRAS(dime,dime,nspin))
+SS4TRAS(:,:)=0.d0
+HS4TRAS(:,:,:)=0.d0
+SSTRAS(:,:)=0.d0
+HSTRAS(:,:,:)=0.d0
+SSBISTRAS(:,:)=0.d0
+HSBISTRAS(:,:,:)=0.d0
+SSTRISTRAS(:,:)=0.d0
+HSTRISTRAS(:,:,:)=0.d0
+do m=1,dime
+  do l=1,dime
+    SSTRAS(m,l)=CONJG(SS(l,m))
+    SSBISTRAS(m,l)=CONJG(SSBIS(l,m))
+    SSTRISTRAS(m,l)=CONJG(SSTRIS(l,m))
+    SS4TRAS(m,l)=CONJG(SS4(l,m))
+    do i=1,nspin
+     HSTRAS(m,l,i)=CONJG(HS(l,m,i))
+     HSBISTRAS(m,l,i)=CONJG(HSBIS(l,m,i))
+     HSTRISTRAS(m,l,i)=CONJG(HSTRIS(l,m,i))
+     HS4TRAS(m,l,i)=CONJG(HS4(l,m,i))
+    enddo
+  enddo
+enddo
+
+
+allocate(BB(dime*8,dime*8),AA(dime*8,dime*8))
+allocate(alpha(dime*8),beta(dime*8))
+lwork=4*8*dime-1
+allocate(work(lwork),rwork(8*8*dime))
+allocate(VR(dime*8,dime*8))
+
+do i=1,nspin
+  write(filename,'("spin",I1,"layer4")')i
+  write(filename2,'("spin",I1,"layer4purereal")')i
+  open(unit=i+100,file=filename,status="unknown")
+  open(unit=i+200,file=filename2,status="unknown")
+ 
+  !change energy in Ry
+  dummyemax=emax/RyToEv
+  dummyemin=emin/RyToEv
+  step=(dummyemax-dummyemin)/nbin 
+  do j=1,nbin+1
+    alpha(:)=1.d0
+    beta(:)=1.d0
+    BB(:,:)=0.d0
+    do l=1,7*dime
+       BB(dime+l,dime+l)=1.d0
+    enddo
+    AA(:,:)=0.d0
+    do l=1,7*dime
+       AA(dime+l,l)=1.d0
+    enddo
+    E=dummyemin+(j-1)*step
+    do m=1,dime
+       do l=1,dime
+            BB(m,l)=HS4TRAS(m,l,i)-E*SS4TRAS(m,l)
+            BB(m,dime+l)=HSTRISTRAS(m,l,i)-E*SSTRISTRAS(m,l)
+            BB(m,2*dime+l)=HSBISTRAS(m,l,i)-E*SSBISTRAS(m,l)
+            BB(m,l+3*dime)=HSTRAS(m,l,i)-E*SSTRAS(m,l)
+            AA(m,l+dime*3)=E*SD(m,l)-HD(m,l,i)
+            AA(m,4*dime+l)=E*SS(m,l)-HS(m,l,i)
+            AA(m,5*dime+l)=E*SSBIS(m,l)-HSBIS(m,l,i)
+            AA(m,6*dime+l)=E*SSTRIS(m,l)-HSTRIS(m,l,i)
+            AA(m,7*dime+l)=E*SS4(m,l)-HS4(m,l,i)
+       enddo
+    enddo
+    call ZGGEV('N', 'V', 8*dime, AA, 8*dime, BB, 8*dime, alpha, beta, VL, 1, VR, 8*dime, work, lwork, rwork, info)
+    if (info .ne. 0) then
+         stop 'failed zggev diagonalisation'
+         write(*,*) info
+    end if
+    do m=1,8*dime
+        thek=-real(real(log(alpha(m)/beta(m))))/dist
+        if (thek.gt.100000000000000) cycle
+        if (thek.ne.thek) cycle
+        write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
+        if (thek.le.0.001.and.thek.ge.-0.001) then
+           write(i+200,*) E*RyToEv, real(aimag(log(alpha(m)/beta(m))))/dist, thek
+        endif
+    enddo
+  enddo
+  close(i+100)
+  close(i+200)
+enddo 
+
+deallocate(AA,BB,alpha,beta)
+deallocate(work,rwork,VR)
+deallocate(HSTRAS,SSTRAS,HSBISTRAS,SSBISTRAS,HSTRISTRAS,SSTRISTRAS,SS4TRAS,HS4TRAS)
+
+end subroutine FourthLayerInteraction
+
 
 subroutine KFirstLayerInteraction(emax,HD,SD,HS,SS,p1,p2,SymSetting,dist)
 
