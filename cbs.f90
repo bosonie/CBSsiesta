@@ -219,11 +219,11 @@ else
       call FirstLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,dist)
    elseif (maxsuperc(dir).eq.2) then
       call SecondLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,dist)
-   else
-!   elseif (maxsuperc(dir).eq.3) then
-      call ThirdLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,dist)
 !   else
-!      call FourthLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4,dist)
+   elseif (maxsuperc(dir).eq.3) then
+      call ThirdLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,dist)
+   else
+      call FourthLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,HS4,SS4,dist)
    endif
    
    deallocate(S,H,SS,HS,HS4,SS4)
@@ -241,9 +241,10 @@ subroutine get_2D_rec_vect(aa,aabis,b1,b2,ap)
 !The theory behind:
 !I first calculate the vector perpendicular to the aa and aabis,
 !I call it ap, second I normalise it.
-!Third I solve the system aa*b1=2pi,aabis*b1=0,ap*b1=0
+!Third I solve the system aa*b1=2pi,aabis*b1=0,ap*b1=0 (* dot product)
 !which is the definition of reciprocal vectors and to impose b1
 !is in the same plane of aa and aabis
+!I solve with cramer rule
 !Same for b2
 implicit none
 

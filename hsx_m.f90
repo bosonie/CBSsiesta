@@ -150,6 +150,8 @@ double complex, intent(out) :: SS4(:,:), HS4(:,:,:)
    SSBIS(1:hw%no_u,1:hw%no_u) = 0
    HSTRIS(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0
    SSTRIS(1:hw%no_u,1:hw%no_u) = 0
+   HS4(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0
+   SS4(1:hw%no_u,1:hw%no_u) = 0
    do io = 1,hw%no_u                             ! loop on unit cell orbitals
      do j = 1,hw%numh(io)                        ! loop on connected orbitals
         ij = hw%listhptr(io)+j                   ! sparse-matrix array index
