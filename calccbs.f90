@@ -84,7 +84,7 @@ do i=1,nspin
     end if
     do m=1,2*dime
         thek=-real(real(log(alpha(m)/beta(m))))/dist
-        if (thek.gt.100000000000000) cycle
+        if (thek.gt.10000000) cycle
         if (thek.ne.thek) cycle
         write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
         if (thek.le.0.001.and.thek.ge.-0.001) then
@@ -188,7 +188,7 @@ do i=1,nspin
     end if
     do m=1,4*dime
         thek=-real(real(log(alpha(m)/beta(m))))/dist
-        if (thek.gt.100000000000000) cycle
+        if (thek.gt.10000000) cycle
         if (thek.ne.thek) cycle
         write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
         if (thek.le.0.001.and.thek.ge.-0.001) then
@@ -300,7 +300,7 @@ do i=1,nspin
     end if
     do m=1,6*dime
         thek=-real(real(log(alpha(m)/beta(m))))/dist
-        if (thek.gt.100000000000000) cycle
+        if (thek.gt.10000000) cycle
         if (thek.ne.thek) cycle
         write(i+100,*) E*RyToEv, thek, real(aimag(log(alpha(m)/beta(m))))/dist
         if (thek.le.0.001.and.thek.ge.-0.001) then
