@@ -2,19 +2,17 @@
 
 program cbs
 
-use hsx_m, only: read_hsx_file,hsx_t,read_OrbIndx_file,createHS
+use readers, only: read_hsx_file, hsx_t, read_OrbIndx_file
 
 use FDF
 
-use calccbs
+use calculators
 
 implicit none
 
 logical :: Ksetting, SymSetting
 double precision :: EMIN, EMAX,p1,p2,dist
 type(hsx_t)  :: hw
-double complex,allocatable :: S(:,:),H(:,:,:), SS(:,:), HS(:,:,:)
-double complex,allocatable :: SSBIS(:,:), HSBIS(:,:,:), SSTRIS(:,:),HSTRIS(:,:,:)
 character(len=10) :: pre
 integer :: bins,j,l,maxsuperc(3),dir,norb,nspin,ooo
 integer,allocatable :: isc(:,:)
@@ -113,116 +111,94 @@ enddo
 !Last summary on the calculation properties
 write(*,*) "N cell replicas in choosen direc",maxsuperc(dir), "norb",hw%no_u, "nspin", hw%nspin
 
-if (maxsuperc(dir).gt.3) then
-   write(*,*) "warning, number of replica in the choosen direction is > 3"
-   write(*,*) "for the calculation we will use the 3 layers structure"
-endif
-
 k(:)=0.d0
-
 
 
 !Fist case, I have fixed E (Emax of input) and 
 !1) fix k as well and find eigenvectors for symmetries: SymSetting
 !2) vary k: Ksetting
-if (Ksetting.or.SymSetting) then
+!if (Ksetting.or.SymSetting) then
+!
+!  if (Ksetting.and.SymSetting) then
+!     STOP "Error: VaringKsetting OR SymSetting is allowed, can't do both at same time"
+!  endif 
+!
+!  if (SymSetting) then
+!        k(:)=p(1)*b1(:)+p(2)*b2(:)
+!        write(*,*) "Analysing projections at"
+!        write(*,*) "E =", emax
+!        write(*,*) "K =", k
+!
+!        allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
+!        allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
+!        allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
+!
+!        call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+!
+!        if (maxsuperc(dir).eq.1) then
+!                call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
+!        elseif (maxsuperc(dir).eq.2) then
+!                call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
+!        else
+!                call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
+!        endif
+!
+!        deallocate(S,H,SS,HS)
+!        deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
+!
+!   else
+!        write(*,*) "b1 and b2 are the 2D reciprocal vector:"
+!        write(*,*) "b1=",b1(:)
+!        write(*,*) "b2=",b2(:)
+!        write(*,*) "Varing k parallel for E =",emax
+!       
+!        p1=0.d0
+!        p2=0.d0
+!        do l=-15,15
+!          do j=-15,15
+!           p1=l*0.5/15.d0
+!           p2=j*0.5/15.d0
+!           k(:)=p1*b1(:)+p2*b2(:)
+!      !     write(*,*) k
+!       
+!          allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
+!          allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
+!          allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
+!       
+!          call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
+!       
+!          if (maxsuperc(dir).eq.1) then
+!             call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
+!          elseif (maxsuperc(dir).eq.2) then
+!             call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
+!          else
+!             call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
+!          endif
+!       
+!          deallocate(S,H,SS,HS)
+!          deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
+!         enddo
+!        enddo
+!
+!   endif
+!
+!!Fixed k and change E
+!else
 
-  if (Ksetting.and.SymSetting) then
-     STOP "Error: VaringKsetting OR SymSetting is allowed, can't do both at same time"
-  endif 
+!Define the k parallel where to calculate the CBS and print out a summary
+k(:)=p(1)*b1(:)+p(2)*b2(:)
+write(*,*) "The k parallel you choose is"
+write(*,*) p(1),"*b1 + ",p(2),"*b2"
+write(*,*) "where b1 and b2 are reciprocal lattice vectors of the 2D BZ"
+write(*,*) "b1 and b2 in the next lines:"
+write(*,*) "b1=",b1(:)
+write(*,*) "b2=",b2(:)
+write(*,*) "The k parallel you choose in cartesian units (bohr) is:"
+write(*,*) k(:)
 
-  if (SymSetting) then
-        k(:)=p(1)*b1(:)+p(2)*b2(:)
-        write(*,*) "Analysing projections at"
-        write(*,*) "E =", emax
-        write(*,*) "K =", k
+call CBSfixedK(hw,dir,isc,k,emin,emax,bins,dist)
 
-        allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
-        allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
-        allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-
-        call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-
-        if (maxsuperc(dir).eq.1) then
-                call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
-        elseif (maxsuperc(dir).eq.2) then
-                call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
-        else
-                call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
-        endif
-
-        deallocate(S,H,SS,HS)
-        deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
-
-   else
-        write(*,*) "b1 and b2 are the 2D reciprocal vector:"
-        write(*,*) "b1=",b1(:)
-        write(*,*) "b2=",b2(:)
-        write(*,*) "Varing k parallel for E =",emax
-       
-        p1=0.d0
-        p2=0.d0
-        do l=-15,15
-          do j=-15,15
-           p1=l*0.5/15.d0
-           p2=j*0.5/15.d0
-           k(:)=p1*b1(:)+p2*b2(:)
-      !     write(*,*) k
-       
-          allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
-          allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
-          allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-       
-          call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-       
-          if (maxsuperc(dir).eq.1) then
-             call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
-          elseif (maxsuperc(dir).eq.2) then
-             call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
-          else
-             call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
-          endif
-       
-          deallocate(S,H,SS,HS)
-          deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
-         enddo
-        enddo
-
-   endif
-
-!Fixed k and change E
-else
-
-   !Define the k parallel where to calculate the CBS and print out a summary
-   k(:)=p(1)*b1(:)+p(2)*b2(:)
-   write(*,*) "The k parallel you choose is"
-   write(*,*) p(1),"*b1 + ",p(2),"*b2"
-   write(*,*) "where b1 and b2 are reciprocal lattice vectors of the 2D BZ"
-   write(*,*) "b1 and b2 in the next lines:"
-   write(*,*) "b1=",b1(:)
-   write(*,*) "b2=",b2(:)
-   write(*,*) "The k parallel you choose in cartesian units (bohr) is:"
-   write(*,*) k(:)
-   
-   
-   allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin), SS(hw%no_u,hw%no_u), HS(hw%no_u,hw%no_u,hw%nspin))
-   allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
-   allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-   
-   call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-  
-   if (maxsuperc(dir).eq.1) then
-      call FirstLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,dist)
-   elseif (maxsuperc(dir).eq.2) then
-      call SecondLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,dist)
-   else
-      call ThirdLayerInteraction(EMIN,EMAX,bins,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,dist)
-   endif
-   
-   deallocate(S,H,SS,HS)
-   deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
-
-endif
+!endif
 
 
 deallocate(isc)

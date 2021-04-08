@@ -1,21 +1,11 @@
-! ---
-! Copyright (C) 1996-2016	The SIESTA group
-!  This file is distributed under the terms of the
-!  GNU General Public License: see COPYING in the top directory
-!  or http://www.gnu.org/copyleft/gpl.txt .
-! See Docs/Contributors.txt for a list of contributors.
-! ---
-module hsx_m
+module readers
 
-!
-! Experimental module to process HSX files
-!
 implicit none
 
 integer, parameter, private :: dp = selected_real_kind(14,100)
 integer, parameter, private :: sp = selected_real_kind(6,30)
 
-public  :: read_hsx_file, createHS
+public  :: read_hsx_file
 public  :: read_OrbIndx_file
 
 ! Set derived type hsx_t to hold info of HSX file, containing:
@@ -125,59 +115,6 @@ character(len=*), intent(in) :: fname
 
 end subroutine read_OrbIndx_file
 
-
-!--------------------------------------
-
-subroutine createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-type(hsx_t), intent(in)  :: hw
-integer, dimension(:,:), intent(in) :: isc
-integer, intent(in) :: dir
-double precision, intent(in) :: k(:)
-double complex, intent(out) :: S(:,:), SS(:,:),SSBIS(:,:),SSTRIS(:,:)
-double complex, intent(out) :: H(:,:,:), HS(:,:,:), HSBIS(:,:,:), HSTRIS(:,:,:)
-
-   complex :: i, phase
-   integer :: io, j, ij, jos, jo
-!   
-   i=(0,1)
-!   
-   S(1:hw%no_u,1:hw%no_u) = 0                       ! full complex overlap matrix
-   H(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0               ! full complex hamiltonian
-   SS(1:hw%no_u,1:hw%no_u) = 0                       ! full complex overlap matrix
-   HS(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0
-   HSBIS(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0
-   SSBIS(1:hw%no_u,1:hw%no_u) = 0
-   HSTRIS(1:hw%no_u,1:hw%no_u,1:hw%nspin) = 0
-   SSTRIS(1:hw%no_u,1:hw%no_u) = 0
-   do io = 1,hw%no_u                             ! loop on unit cell orbitals
-     do j = 1,hw%numh(io)                        ! loop on connected orbitals
-        ij = hw%listhptr(io)+j                   ! sparse-matrix array index
-        jos = hw%listh(ij)                       ! index of connected orbital
-        jo = hw%indxuo(jos)                      ! equiv. orbital in unit cell
-        phase = exp(i*sum(k(:)*hw%xij(:,ij)))    !exp(i*(k(1)*hw%xij(1,ij)+k(2)*hw%xij(2,ij)))
-        if (isc(jos,dir).eq.0) then
-      !     phase = exp(i*sum(k(:)*hw%xij(:,ij)))  !(k(1)*hw%xij(1,ij)+k(2)*hw%xij(2,ij)))  !sum(k(:)*hw%xij(:,ij)))
-           H(io,jo,1:hw%nspin) = H(io,jo,1:hw%nspin) + phase*hw%hamilt(ij,1:hw%nspin)
-           S(io,jo) = S(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
-        elseif (isc(jos,dir).eq.-1) then
-       !    phase = 1 !exp(i*(k(1)*hw%xij(1,jo)+k(2)*hw%xij(2,jo)))   !sum(k(:)*hw%xij(:,jo)))
-           HS(io,jo,1:hw%nspin) = HS(io,jo,1:hw%nspin) + phase*hw%hamilt(ij,1:hw%nspin)
-           SS(io,jo) = SS(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
-        elseif (isc(jos,dir).eq.-2) then
-       !    phase = 1 !exp(i*(k(1)*hw%xij(1,jo)+k(2)*hw%xij(2,jo)))        !sum(k(:)*hw%xij(:,jo)))
-           HSBIS(io,jo,1:hw%nspin) = HSBIS(io,jo,1:hw%nspin) +phase*hw%hamilt(ij,1:hw%nspin)
-           SSBIS(io,jo) = SSBIS(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
-        elseif (isc(jos,dir).eq.-3) then
-       !    phase = 1!exp(i*(k(1)*hw%xij(1,jo)+k(2)*hw%xij(2,jo)))         !sum(k(:)*hw%xij(:,jo)))
-           HSTRIS(io,jo,1:hw%nspin) = HSTRIS(io,jo,1:hw%nspin)+phase*hw%hamilt(ij,1:hw%nspin)
-           SSTRIS(io,jo) = SSTRIS(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
-        endif
-     enddo
-   enddo
-   
-end subroutine createHS
-   
-   
 
 !--------------------------------------
 
@@ -338,4 +275,4 @@ end subroutine get_unit_number
 
 
 
-end module hsx_m
+end module readers
