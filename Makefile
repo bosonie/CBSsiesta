@@ -76,8 +76,7 @@ cbs: $(FDF)  $(ALL_OBJS_STM)
 #
 clean:
 	@echo "==> Cleaning object, library, and executable files"
-	rm -f cbs *.o  *.a
-	rm -f *.mod
+	rm -f cbs *.o  *.a *.mod
 	(cd fdf ; $(MAKE) -f $(FDF_MAKEFILE) "ARCH_MAKE=../$(ARCH_MAKE)" clean)
 	rm -f _tmp_deps deps.list  protomake*
 #
