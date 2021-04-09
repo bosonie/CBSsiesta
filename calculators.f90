@@ -30,7 +30,8 @@ type(Hlayer), allocatable :: trans_hes(:)
 type(Slayer), allocatable :: trans_ses(:)
 
 complex :: i, phase
-integer :: io, j, ij, jos, jo, layers, l, m, dime,nspin,lwork,info,spin,lay,integg
+integer :: io,j,ij,jos,jo,layers,l,m,dime,nspin,lwork,info,spin,lay,integg,start_eig
+integer, allocatable :: count_fail(:)
 double precision :: dummyemax,dummyemin,E,step,thek
 double complex,allocatable :: SSTRAS(:,:), HSTRAS(:,:,:)
 double complex,allocatable :: BB(:,:),AA(:,:),work(:)
@@ -68,7 +69,7 @@ character(len=21) :: filename, filename2
         jo = hw%indxuo(jos)                      ! equiv. orbital in unit cell
         phase = exp(i*sum(k(:)*hw%xij(:,ij)))    !exp(i*(k(1)*hw%xij(1,ij)+k(2)*hw%xij(2,ij)))
         do l=1,layers+1
-          if (isc(jos,dir).eq.l-1) then
+          if (isc(jos,dir).eq.-(l-1)) then
             hes(l)%the_h(io,jo,1:hw%nspin) = hes(l)%the_h(io,jo,1:hw%nspin) + phase*hw%hamilt(ij,1:hw%nspin)
             ses(l)%the_s(io,jo) = ses(l)%the_s(io,jo) + phase*hw%Sover(ij) ! overlap matrix element
           endif
@@ -77,7 +78,9 @@ character(len=21) :: filename, filename2
    enddo
 
    dime = hw%no_u
-   nspin = hw%nspin   
+   nspin = hw%nspin
+
+   allocate(count_fail(nspin))
 
    !Create conjugate transpose, now we do not have the HD/SD
    allocate(trans_ses(layers))
@@ -104,8 +107,11 @@ character(len=21) :: filename, filename2
    
    
    do spin=1,nspin
+     
+     count_fail(spin) = 0
+
      write(filename,'("spin",I1,"layer",I1)')spin,layers
-     write(filename2,'("spin",I1,"layer1purereal",I1)')spin,layers
+     write(filename2,'("spin",I1,"layer",I1,"purereal")')spin,layers
      open(unit=spin+100,file=filename,status="unknown")
      open(unit=spin+200,file=filename2,status="unknown") 
 
@@ -135,13 +141,17 @@ character(len=21) :: filename, filename2
             enddo
           enddo
        enddo
+       start_eig = 1
        call ZGGEV('N', 'V', 2*layers*dime, AA, 2*layers*dime, BB, 2*layers*dime, &
          alpha, beta, VL, 1, VR, dime*2*layers, work, lwork, rwork, info)
        if (info .ne. 0) then
-         write(*,*) info
-         stop 'failed zggev diagonalisation'
+         !write(*,*) info
+         start_eig = info+1
+         count_fail(spin) = count_fail(spin)+1
+         !stop 'failed zggev diagonalisation'
+         !cycle
        end if
-       do m=1,2*layers*dime
+       do m=start_eig,2*layers*dime
          thek=-real(real(log(alpha(m)/beta(m))))/dist
          if (thek.gt.10000000) cycle
          if (thek.ne.thek) cycle
@@ -154,9 +164,17 @@ character(len=21) :: filename, filename2
      close(spin+100)
    enddo 
 
+do jo=1,nspin
+  write(*,*) "For spin", jo, ",", count_fail(jo), "bins out of", nbin, "could not produce all the eigenvalues."
+enddo
+if (any(count_fail>0)) then
+  write(*,*) "Problem due to a failure of LAPACK routine ZGGEV, &
+          probably linked to numerical instability of Schur decomposition within LAPACK."
+endif 
+
 deallocate(AA,BB,alpha,beta)
 deallocate(work,rwork,VR)
-!deallocate(trans_ses,trans_hes,hes,ses)
+deallocate(trans_ses,trans_hes,hes,ses,count_fail)
 
 end subroutine CBSfixedK
 
