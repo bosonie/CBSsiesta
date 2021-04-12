@@ -111,8 +111,17 @@ enddo
 !Last summary on the calculation properties
 write(*,*) "N cell replicas in choosen direc",maxsuperc(dir), "norb",hw%no_u, "nspin", hw%nspin
 
-k(:)=0.d0
+if (Ksetting.and.SymSetting) then
+  STOP "Error: VaringKsetting OR SymSetting is allowed, can't do both at same time"
+endif
 
+if (Ksetting) then
+  write(*,*) "b1 and b2 are the 2D reciprocal vector:"
+  write(*,*) "b1=",b1(:)
+  write(*,*) "b2=",b2(:)
+  write(*,*) "Varing k parallel for E =", emax
+  call CBSvariableK(hw,dir,isc,emax,dist,b1,b2) 
+!endif
 
 !Fist case, I have fixed E (Emax of input) and 
 !1) fix k as well and find eigenvectors for symmetries: SymSetting
@@ -183,22 +192,23 @@ k(:)=0.d0
 !   endif
 !
 !!Fixed k and change E
-!else
+
+else
 
 !Define the k parallel where to calculate the CBS and print out a summary
-k(:)=p(1)*b1(:)+p(2)*b2(:)
-write(*,*) "The k parallel you choose is"
-write(*,*) p(1),"*b1 + ",p(2),"*b2"
-write(*,*) "where b1 and b2 are reciprocal lattice vectors of the 2D BZ"
-write(*,*) "b1 and b2 in the next lines:"
-write(*,*) "b1=",b1(:)
-write(*,*) "b2=",b2(:)
-write(*,*) "The k parallel you choose in cartesian units (bohr) is:"
-write(*,*) k(:)
+  k(:)=p(1)*b1(:)+p(2)*b2(:)
+  write(*,*) "The k parallel you choose is"
+  write(*,*) p(1),"*b1 + ",p(2),"*b2"
+  write(*,*) "where b1 and b2 are reciprocal lattice vectors of the 2D BZ"
+  write(*,*) "b1 and b2 in the next lines:"
+  write(*,*) "b1=",b1(:)
+  write(*,*) "b2=",b2(:)
+  write(*,*) "The k parallel you choose in cartesian units (bohr) is:"
+  write(*,*) k(:)
+  
+  call CBSfixedK(hw,dir,isc,k,emin,emax,bins,dist)
 
-call CBSfixedK(hw,dir,isc,k,emin,emax,bins,dist)
-
-!endif
+endif
 
 
 deallocate(isc)
