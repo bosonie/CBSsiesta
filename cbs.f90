@@ -92,7 +92,6 @@ else
 endif
 
 
-
 !Norbital and Nspin
 norb=hw%no_u
 nspin=hw%nspin
@@ -121,81 +120,14 @@ if (Ksetting) then
   write(*,*) "b2=",b2(:)
   write(*,*) "Varing k parallel for E =", emax
   call CBSvariableK(hw,dir,isc,emax,dist,b1,b2) 
-!endif
-
-!Fist case, I have fixed E (Emax of input) and 
-!1) fix k as well and find eigenvectors for symmetries: SymSetting
-!2) vary k: Ksetting
-!if (Ksetting.or.SymSetting) then
-!
-!  if (Ksetting.and.SymSetting) then
-!     STOP "Error: VaringKsetting OR SymSetting is allowed, can't do both at same time"
-!  endif 
-!
-!  if (SymSetting) then
-!        k(:)=p(1)*b1(:)+p(2)*b2(:)
-!        write(*,*) "Analysing projections at"
-!        write(*,*) "E =", emax
-!        write(*,*) "K =", k
-!
-!        allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
-!        allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
-!        allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-!
-!        call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-!
-!        if (maxsuperc(dir).eq.1) then
-!                call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
-!        elseif (maxsuperc(dir).eq.2) then
-!                call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
-!        else
-!                call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
-!        endif
-!
-!        deallocate(S,H,SS,HS)
-!        deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
-!
-!   else
-!        write(*,*) "b1 and b2 are the 2D reciprocal vector:"
-!        write(*,*) "b1=",b1(:)
-!        write(*,*) "b2=",b2(:)
-!        write(*,*) "Varing k parallel for E =",emax
-!       
-!        p1=0.d0
-!        p2=0.d0
-!        do l=-15,15
-!          do j=-15,15
-!           p1=l*0.5/15.d0
-!           p2=j*0.5/15.d0
-!           k(:)=p1*b1(:)+p2*b2(:)
-!      !     write(*,*) k
-!       
-!          allocate(S(hw%no_u,hw%no_u),H(hw%no_u,hw%no_u,hw%nspin),SS(hw%no_u,hw%no_u),HS(hw%no_u,hw%no_u,hw%nspin))
-!          allocate(SSBIS(hw%no_u,hw%no_u), HSBIS(hw%no_u,hw%no_u,hw%nspin))
-!          allocate(SSTRIS(hw%no_u,hw%no_u),HSTRIS(hw%no_u,hw%no_u,hw%nspin))
-!       
-!          call createHS(hw,dir,isc,k,S,H,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS)
-!       
-!          if (maxsuperc(dir).eq.1) then
-!             call KFirstLayerInteraction(EMAX,H,S,HS,SS,p1,p2,SymSetting,dist)
-!          elseif (maxsuperc(dir).eq.2) then
-!             call KSecondLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,p1,p2,SymSetting,dist)
-!          else
-!             call KThirdLayerInteraction(EMAX,H,S,HS,SS,HSBIS,SSBIS,HSTRIS,SSTRIS,p1,p2,SymSetting,dist)
-!          endif
-!       
-!          deallocate(S,H,SS,HS)
-!          deallocate(SSBIS,HSBIS,SSTRIS,HSTRIS)
-!         enddo
-!        enddo
-!
-!   endif
-!
-!!Fixed k and change E
-
+else if (SymSetting) then
+  k(:)=p(1)*b1(:)+p(2)*b2(:)
+  write(*,*) "Analysing projections at"
+  write(*,*) "E =", emax
+  write(*,*) "K =", k
+  call CBSsymmetries(hw,dir,isc,k,emax,dist)
 else
-
-!Define the k parallel where to calculate the CBS and print out a summary
+  !Define the k parallel where to calculate the CBS and print out a summary
   k(:)=p(1)*b1(:)+p(2)*b2(:)
   write(*,*) "The k parallel you choose is"
   write(*,*) p(1),"*b1 + ",p(2),"*b2"
@@ -205,9 +137,7 @@ else
   write(*,*) "b2=",b2(:)
   write(*,*) "The k parallel you choose in cartesian units (bohr) is:"
   write(*,*) k(:)
-  
   call CBSfixedK(hw,dir,isc,k,emin,emax,bins,dist)
-
 endif
 
 
